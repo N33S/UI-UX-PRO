@@ -11,3 +11,8 @@ python3 .claude/skills/ui-ux-pro-max/scripts/search.py "beauty spa landing page"
 ```
 
 Upstream license (MIT): `.claude/skills/LICENSE-ui-ux-pro-max`.
+
+## 21st.dev MCP
+
+`.mcp.json` registers the [21st.dev](https://21st.dev) MCP server (generated with `npx @21st-dev/cli@latest init --client claude --write`).
+Get an API key at https://21st.dev/settings/api-keys and set it as `API_KEY_21ST` in your environment — never commit the key itself.
