@@ -4,25 +4,30 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: one long column on a 12-col grid. Hero = headline left, live call log right.
-   Every section is a "shift" of the phone: night, busy, routing, morning report. */
+/* Layout: one long column on a centered wrap. The page moves through a working day:
+   fog hero -> night (after-hours grid) -> white spec sheet -> fog timeline -> white morning report
+   -> fog pricing -> white FAQ -> cobalt call to action. */
 :root {
   --paper: #eef1f2;        /* cool fog, faint blue-green bias */
   --sheet: #ffffff;
   --ink: #0b1620;
-  --ink-2: #44525e;
-  --ink-3: #6b7883;
+  --ink-2: #3f4d59;
+  --ink-3: #5b6873;
   --line: #d3dade;
+  --dot: #c5ced3;
   --signal: #1d3cf5;       /* electric cobalt: the line is live */
   --signal-ink: #ffffff;
-  --signal-soft: #dfe5ff;
+  --signal-soft: #e3e8ff;
   --sodium: #ffc21a;       /* HASTER / warning lamp */
   --sodium-ink: #1a1400;
-  --open: #c7d0d6;
   --night: #0b1620;
   --night-fg: #eef1f2;
   --night-2: #9fb0bd;
   --night-line: #233340;
+  --night-cell: #1d3cf5;
+  --night-open: #1a2a37;
+  --phone-bezel: #05090d;
+  --phone-fg: #f2f5f7;
 
   --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
   --body: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
@@ -30,40 +35,44 @@
 
   --s-1: clamp(2.6rem, 6.4vw, 5.6rem);
   --s-2: clamp(1.9rem, 3.6vw, 3rem);
-  --s-3: clamp(1.25rem, 1.8vw, 1.5rem);
+  --s-3: clamp(1.2rem, 1.7vw, 1.4rem);
   --s-body: 1.0625rem;
-  --s-small: .875rem;
-  --s-micro: .75rem;
+  --s-small: .9rem;
+  --s-micro: .78rem;
 
   --radius: 14px;
   --wrap: 1180px;
+  --nav-h: 68px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #081016; --sheet: #0f1b24; --ink: #e9eef1; --ink-2: #aab8c2; --ink-3: #7f909c;
-    --line: #1f2e39; --signal: #7088ff; --signal-ink: #050b30; --signal-soft: #17224d;
-    --sodium: #ffcc3d; --sodium-ink: #1a1400; --open: #22323e;
-    --night: #121f29; --night-fg: #e9eef1; --night-2: #93a4b1; --night-line: #26384a;
+    --paper: #081016; --sheet: #0d1820; --ink: #e9eef1; --ink-2: #b3c0c9; --ink-3: #8b9ba6;
+    --line: #1f2e39; --dot: #1c2a35; --signal: #7088ff; --signal-ink: #050b30; --signal-soft: #17224d;
+    --sodium: #ffcc3d; --sodium-ink: #1a1400;
+    --night: #03070b; --night-fg: #e9eef1; --night-2: #93a4b1; --night-line: #1a2733;
+    --night-cell: #5d77ff; --night-open: #14212c;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #081016; --sheet: #0f1b24; --ink: #e9eef1; --ink-2: #aab8c2; --ink-3: #7f909c;
-  --line: #1f2e39; --signal: #7088ff; --signal-ink: #050b30; --signal-soft: #17224d;
-  --sodium: #ffcc3d; --sodium-ink: #1a1400; --open: #22323e;
-  --night: #121f29; --night-fg: #e9eef1; --night-2: #93a4b1; --night-line: #26384a;
+  --paper: #081016; --sheet: #0d1820; --ink: #e9eef1; --ink-2: #b3c0c9; --ink-3: #8b9ba6;
+  --line: #1f2e39; --dot: #1c2a35; --signal: #7088ff; --signal-ink: #050b30; --signal-soft: #17224d;
+  --sodium: #ffcc3d; --sodium-ink: #1a1400;
+  --night: #03070b; --night-fg: #e9eef1; --night-2: #93a4b1; --night-line: #1a2733;
+  --night-cell: #5d77ff; --night-open: #14212c;
   color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body {
+  margin: 0;
   background: var(--paper);
   color: var(--ink);
   font: 400 var(--s-body)/1.6 var(--body);
   -webkit-font-smoothing: antialiased;
   padding-inline: 16px;
+  overflow-x: clip;
 }
 .wrap { max-width: var(--wrap); margin-inline: auto; }
 h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
@@ -72,277 +81,415 @@ a { color: inherit; }
 :focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 6px; }
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .label {
-  font: 500 var(--s-micro)/1.2 var(--mono);
+  font: 500 var(--s-micro)/1.3 var(--mono);
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
+section[id], main[id] { scroll-margin-top: calc(var(--nav-h) + 8px); }
 
 /* ---------- Nav ---------- */
 .nav {
-  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
   margin-inline: -16px; padding: 12px 16px;
-  background: color-mix(in srgb, var(--paper) 86%, transparent);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 84%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
 }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font: 800 1.15rem/1 var(--display); letter-spacing: -.02em; }
 .brand svg { flex: none; }
 .nav-links { display: flex; gap: 28px; font-size: var(--s-small); font-weight: 500; }
-.nav-links a { text-decoration: none; color: var(--ink-2); padding: 8px 0; }
+.nav-links a { text-decoration: none; color: var(--ink-2); padding: 8px 0; transition: color .2s ease; }
 .nav-links a:hover { color: var(--ink); }
-@media (max-width: 820px) { .nav-links { display: none; } }
+.nav-end { display: flex; align-items: center; gap: 8px; }
+.mnav { display: none; position: relative; }
+.mnav summary {
+  list-style: none; cursor: pointer; width: 44px; height: 44px; border-radius: 12px;
+  display: grid; place-items: center; border: 1px solid var(--line); color: var(--ink);
+}
+.mnav summary::-webkit-details-marker { display: none; }
+.mnav summary svg { width: 20px; height: 20px; }
+.mnav[open] summary { background: var(--sheet); }
+.mnav nav {
+  position: absolute; right: 0; top: calc(100% + 8px); width: min(260px, calc(100vw - 32px));
+  background: var(--sheet); border: 1px solid var(--line); border-radius: 16px; padding: 8px;
+  box-shadow: 0 24px 48px -24px rgba(11, 22, 32, .45);
+  display: flex; flex-direction: column;
+}
+.mnav nav a { text-decoration: none; padding: 12px 14px; border-radius: 10px; font-weight: 500; }
+.mnav nav a:hover { background: var(--paper); }
+@media (max-width: 820px) {
+  .nav-links { display: none; }
+  .mnav { display: block; }
+}
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   min-height: 48px; padding: 0 22px; border-radius: 999px;
   font: 600 1rem/1 var(--body); text-decoration: none; cursor: pointer;
   border: 1px solid transparent;
-  transition: transform .2s ease, background-color .2s ease, border-color .2s ease;
+  transition: transform .2s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
-.btn-primary { background: var(--signal); color: var(--signal-ink); }
-.btn-primary:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--signal) 88%, var(--ink)); }
-.btn-ghost { border-color: var(--line); color: var(--ink); background: transparent; }
+.btn-primary { background: var(--signal); color: var(--signal-ink); box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--signal) 80%, transparent); }
+.btn-primary:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--signal) 88%, var(--ink)); box-shadow: 0 14px 28px -12px color-mix(in srgb, var(--signal) 90%, transparent); }
+.btn-ghost { border-color: var(--line); color: var(--ink); background: color-mix(in srgb, var(--sheet) 60%, transparent); }
 .btn-ghost:hover { border-color: var(--ink-3); }
-.btn-sm { min-height: 40px; padding: 0 16px; font-size: .9rem; }
-.btn svg { width: 18px; height: 18px; }
+.btn-sm { min-height: 44px; padding: 0 18px; font-size: .92rem; }
+.btn svg { width: 18px; height: 18px; transition: transform .2s ease; }
+.btn:hover svg { transform: translateX(2px); }
+
+/* ---------- Section bands ---------- */
+.band { margin-inline: -16px; padding-inline: 16px; padding-block: clamp(64px, 8vw, 104px); }
+.band-sheet { background: var(--sheet); }
+.band-night { background: var(--night); color: var(--night-fg); }
+.sec-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px 64px; align-items: end; margin-bottom: clamp(32px, 4.5vw, 52px); }
+@media (max-width: 860px) { .sec-head { grid-template-columns: minmax(0, 1fr); } }
+.sec-head h2 { font-size: var(--s-2); font-weight: 800; letter-spacing: -.03em; line-height: 1.04; }
+.sec-head .label { grid-column: 1 / -1; }
+.sec-head p { color: var(--ink-2); max-width: 36em; }
+.band-night .label { color: var(--night-2); }
+.band-night .sec-head p { color: var(--night-2); }
 
 /* ---------- Hero ---------- */
-.hero { padding-block: clamp(48px, 8vw, 104px) clamp(48px, 7vw, 88px); }
-.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
+.hero { position: relative; margin-inline: -16px; padding-inline: 16px; padding-block: clamp(40px, 7vw, 96px) clamp(56px, 7vw, 96px); isolation: isolate; }
+.hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background-image: radial-gradient(var(--dot) 1.2px, transparent 1.6px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(70% 80% at 75% 45%, #000 0%, transparent 75%);
+          mask-image: radial-gradient(70% 80% at 75% 45%, #000 0%, transparent 75%);
+}
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
 @media (max-width: 960px) { .hero .wrap { grid-template-columns: minmax(0, 1fr); } }
 .hero-copy { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
 .kicker { display: inline-flex; align-items: center; gap: 10px; }
-.live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 50%, transparent); animation: ping 2s infinite; }
+.live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--signal); flex: none; animation: ping 2s infinite; }
 @keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 55%, transparent); } 80%, 100% { box-shadow: 0 0 0 10px transparent; } }
 .hero h1 { font-size: var(--s-1); font-weight: 800; line-height: .98; letter-spacing: -.035em; }
-.hero h1 .strike { position: relative; white-space: nowrap; }
-.hero h1 .strike::after {
-  content: ""; position: absolute; left: -2%; right: -2%; top: 54%; height: .09em;
-  background: var(--sodium); transform: rotate(-2deg); border-radius: 4px;
+.hero h1 .mark { position: relative; white-space: nowrap; z-index: 0; }
+.hero h1 .mark::after {
+  content: ""; position: absolute; z-index: -1; left: -.04em; right: -.06em; bottom: .02em; height: .3em;
+  background: var(--sodium); border-radius: .08em; transform: skewX(-8deg) rotate(-1deg);
 }
+.hero h1 .hl { color: var(--signal); }
 .hero-lede { font-size: clamp(1.1rem, 1.5vw, 1.3rem); color: var(--ink-2); max-width: 34em; line-height: 1.5; }
 .hero-lede strong { color: var(--ink); font-weight: 600; }
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .guarantee-note { display: flex; align-items: center; gap: 10px; font-size: var(--s-small); color: var(--ink-2); }
 .guarantee-note svg { width: 18px; height: 18px; color: var(--signal); flex: none; }
 
+/* mobile-only notification above the headline */
+.toast {
+  display: none; align-items: center; gap: 12px;
+  background: var(--sheet); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px 10px 10px;
+  box-shadow: 0 16px 32px -20px rgba(11, 22, 32, .45);
+}
+.toast .app { width: 36px; height: 36px; border-radius: 10px; background: var(--signal); display: grid; place-items: center; flex: none; }
+.toast .app svg { width: 20px; height: 16px; }
+.toast .txt { min-width: 0; font-size: .86rem; line-height: 1.35; }
+.toast .txt b { display: flex; gap: 6px; align-items: center; font-size: .8rem; }
+.toast .txt span { color: var(--ink-2); }
+@media (max-width: 960px) { .toast { display: flex; } }
+
 /* call log card */
+.call-wrap { position: relative; min-width: 0; }
+.call-wrap .bigwave { position: absolute; right: 0; top: 50%; width: 100%; transform: translateY(-50%); z-index: -1; color: var(--signal); opacity: .12; pointer-events: none; }
 .call {
   background: var(--night); color: var(--night-fg);
-  border-radius: 22px; padding: 22px; min-width: 0;
-  box-shadow: 0 30px 60px -30px rgba(11, 22, 32, .55);
+  border-radius: 24px; padding: 22px; min-width: 0;
+  border: 1px solid var(--night-line);
+  box-shadow: 0 40px 80px -36px rgba(11, 22, 32, .6), 0 0 0 1px rgba(255, 255, 255, .02) inset;
   display: flex; flex-direction: column; gap: 18px;
 }
 .call-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
 .call-head .who { font: 600 1rem/1.3 var(--body); }
-.call-head .meta { font: 400 var(--s-micro)/1.4 var(--mono); color: var(--night-2); letter-spacing: .04em; }
+.call-head .meta { font: 400 var(--s-micro)/1.4 var(--mono); color: var(--night-2); letter-spacing: .04em; font-variant-numeric: tabular-nums; }
 .pill {
   display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px;
-  font: 500 var(--s-micro)/1 var(--mono); letter-spacing: .06em; text-transform: uppercase;
-  background: color-mix(in srgb, var(--signal) 22%, transparent); color: var(--night-fg);
-  border: 1px solid color-mix(in srgb, var(--signal) 50%, transparent);
+  font: 500 .72rem/1 var(--mono); letter-spacing: .06em; text-transform: uppercase;
+  background: color-mix(in srgb, var(--night-cell) 22%, transparent); color: var(--night-fg);
+  border: 1px solid color-mix(in srgb, var(--night-cell) 55%, transparent);
 }
 .wave { display: inline-flex; align-items: center; gap: 2px; height: 12px; }
 .wave i { display: block; width: 2px; height: 100%; background: currentColor; border-radius: 2px; animation: wv 1s ease-in-out infinite; }
-.wave i:nth-child(2) { animation-delay: -.2s } .wave i:nth-child(3) { animation-delay: -.4s } .wave i:nth-child(4) { animation-delay: -.6s }
+.wave i:nth-child(2) { animation-delay: -.2s } .wave i:nth-child(3) { animation-delay: -.4s } .wave i:nth-child(4) { animation-delay: -.6s } .wave i:nth-child(5) { animation-delay: -.8s }
 @keyframes wv { 0%, 100% { transform: scaleY(.3) } 50% { transform: scaleY(1) } }
-.transcript { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.transcript { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .transcript li {
-  display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px;
-  font-size: .94rem; line-height: 1.45; padding: 8px 10px; border-radius: 10px;
+  position: relative; overflow: hidden;
+  display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: 10px;
+  font-size: .94rem; line-height: 1.45; padding: 9px 12px; border-radius: 12px;
   border: 1px solid transparent; transition: background-color .35s ease, border-color .35s ease;
 }
-.transcript li .t { font: 400 var(--s-micro)/1.9 var(--mono); color: var(--night-2); }
-.transcript li .spk { display: block; font: 500 var(--s-micro)/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--night-2); margin-bottom: 2px; }
-.transcript li.ai .spk { color: color-mix(in srgb, var(--signal) 70%, var(--night-fg)); }
+.transcript li .t { font: 400 .72rem/1.9 var(--mono); color: var(--night-2); font-variant-numeric: tabular-nums; }
+.transcript li .spk { display: flex; align-items: center; gap: 8px; font: 500 .72rem/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--night-2); margin-bottom: 2px; }
+.transcript li .spk .wave { display: none; height: 10px; }
+.transcript li.ai .spk { color: color-mix(in srgb, var(--night-cell) 65%, var(--night-fg)); }
 .transcript li.active { background: color-mix(in srgb, var(--night-fg) 6%, transparent); border-color: var(--night-line); }
-.lead {
-  border-top: 1px dashed var(--night-line); padding-top: 16px;
-  display: flex; flex-direction: column; gap: 10px;
+.transcript li.active .spk .wave { display: inline-flex; }
+.transcript li.active::after {
+  content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%;
+  background: color-mix(in srgb, var(--night-cell) 80%, var(--night-fg)); transform-origin: left;
+  animation: prog var(--line-dur, 2.8s) linear forwards;
 }
+@keyframes prog { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+.lead { border-top: 1px dashed var(--night-line); padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
 .lead-card { background: color-mix(in srgb, var(--night-fg) 7%, transparent); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
 .lead-card .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.tag { font: 600 .7rem/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 5px 8px; border-radius: 6px; }
+.tag { font: 600 .68rem/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
 .tag-urgent { background: var(--sodium); color: var(--sodium-ink); }
 .tag-cat { background: color-mix(in srgb, var(--night-fg) 12%, transparent); color: var(--night-fg); }
 .lead-card p { font-size: .92rem; }
-.lead-card .to { font: 400 var(--s-micro)/1.4 var(--mono); color: var(--night-2); }
 .fictive { font: 400 .7rem/1.4 var(--mono); color: var(--night-2); }
 
-/* ---------- Generic section ---------- */
-section.block { padding-block: clamp(64px, 9vw, 120px); border-top: 1px solid var(--line); }
-.sec-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px 64px; align-items: end; margin-bottom: clamp(36px, 5vw, 56px); }
-@media (max-width: 860px) { .sec-head { grid-template-columns: minmax(0, 1fr); } }
-.sec-head h2 { font-size: var(--s-2); font-weight: 800; letter-spacing: -.03em; line-height: 1.04; }
-.sec-head .label { grid-column: 1 / -1; }
-.sec-head p { color: var(--ink-2); max-width: 36em; }
-
-/* ---------- Week coverage ---------- */
-.week { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(18px, 3vw, 32px); display: flex; flex-direction: column; gap: 24px; }
-.week-scroll { overflow-x: auto; }
-.week-grid { display: grid; grid-template-columns: 44px repeat(24, minmax(14px, 1fr)); gap: 3px; min-width: 520px; }
-.week-grid .d { font: 500 var(--s-micro)/1 var(--mono); color: var(--ink-3); display: flex; align-items: center; }
-.week-grid .h { font: 400 .65rem/1 var(--mono); color: var(--ink-3); text-align: left; padding-bottom: 4px; }
-.cell { height: 26px; border-radius: 4px; background: var(--signal); }
-.cell.open {
-  background: repeating-linear-gradient(135deg, var(--open) 0 4px, color-mix(in srgb, var(--signal) 45%, var(--open)) 4px 6px);
+/* ---------- Night: week coverage ---------- */
+.week { display: flex; flex-direction: column; gap: 24px; }
+.week-scroll { overflow-x: auto; padding: 4px 2px 8px; }
+.week-grid { display: grid; grid-template-columns: 44px repeat(24, minmax(14px, 1fr)); gap: 4px; min-width: 560px; position: relative; }
+.week-grid .d { font: 500 var(--s-micro)/1 var(--mono); color: var(--night-2); display: flex; align-items: center; }
+.week-grid .h { font: 400 .68rem/1 var(--mono); color: var(--night-2); padding-bottom: 6px; }
+.cell {
+  height: 28px; border-radius: 5px; position: relative;
+  background: var(--night-cell);
+  box-shadow: 0 0 14px -2px color-mix(in srgb, var(--night-cell) 55%, transparent);
 }
-.legend { display: flex; flex-wrap: wrap; gap: 12px 28px; font-size: var(--s-small); color: var(--ink-2); }
+.cell.open {
+  box-shadow: none;
+  background: repeating-linear-gradient(135deg, var(--night-open) 0 5px, color-mix(in srgb, var(--night-cell) 40%, var(--night-open)) 5px 7px);
+}
+.cell.now { outline: 2px solid var(--sodium); outline-offset: 2px; z-index: 1; }
+.cell.now::after {
+  content: "NU"; position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%);
+  font: 600 .62rem/1 var(--mono); letter-spacing: .06em; padding: 4px 6px; border-radius: 4px;
+  background: var(--sodium); color: var(--sodium-ink);
+}
+.now-line { font: 500 .85rem/1.5 var(--mono); color: var(--night-fg); display: flex; align-items: center; gap: 10px; }
+.now-line i { width: 10px; height: 10px; border-radius: 3px; background: var(--sodium); flex: none; }
+.now-line:empty { display: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px 28px; font-size: var(--s-small); color: var(--night-2); }
 .legend span { display: inline-flex; align-items: center; gap: 10px; }
-.legend i { width: 18px; height: 14px; border-radius: 3px; background: var(--signal); }
-.legend i.open { background: repeating-linear-gradient(135deg, var(--open) 0 4px, color-mix(in srgb, var(--signal) 45%, var(--open)) 4px 6px); }
-.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line); }
-.stat { padding: 20px 20px 0 0; display: flex; flex-direction: column; gap: 6px; }
-.stat + .stat { padding-left: 20px; border-left: 1px solid var(--line); }
-.stat b { font: 800 clamp(2rem, 4vw, 3rem)/1 var(--display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
-.stat span { font-size: var(--s-small); color: var(--ink-2); }
+.legend i { width: 18px; height: 14px; border-radius: 3px; background: var(--night-cell); flex: none; }
+.legend i.open { background: repeating-linear-gradient(135deg, var(--night-open) 0 4px, color-mix(in srgb, var(--night-cell) 40%, var(--night-open)) 4px 6px); }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--night-line); }
+.stat { padding: 24px 20px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.stat + .stat { padding-left: 24px; border-left: 1px solid var(--night-line); }
+.stat b { font: 800 clamp(2.2rem, 4.4vw, 3.4rem)/1 var(--display); letter-spacing: -.035em; }
+.stat b em { font-style: normal; color: color-mix(in srgb, var(--night-cell) 70%, var(--night-fg)); }
+.stat span { font-size: var(--s-small); color: var(--night-2); }
 @media (max-width: 640px) {
   .stats { grid-template-columns: minmax(0, 1fr); }
-  .stat, .stat + .stat { padding: 16px 0; border-left: 0; }
-  .stat + .stat { border-top: 1px solid var(--line); }
+  .stat, .stat + .stat { padding: 18px 0; border-left: 0; }
+  .stat + .stat { border-top: 1px solid var(--night-line); }
 }
 
 /* ---------- Features (spec sheet rows) ---------- */
 .specs { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--ink); }
 .spec {
-  display: grid; grid-template-columns: 56px minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 20px 32px; padding: 26px 0; border-bottom: 1px solid var(--line); align-items: start;
+  display: grid; grid-template-columns: 48px minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 1.15fr);
+  gap: 16px 32px; padding: 24px 16px; border-bottom: 1px solid var(--line); align-items: center;
+  border-radius: 0; transition: background-color .25s ease;
 }
-.spec .ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--signal-soft); color: var(--signal); }
+.spec:hover { background: var(--paper); }
+.spec .ic { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--line); color: var(--ink); background: var(--sheet); transition: border-color .25s ease, color .25s ease; }
+.spec:hover .ic { border-color: var(--signal); color: var(--signal); }
 .spec .ic svg { width: 22px; height: 22px; }
-.spec.urgent .ic { background: var(--sodium); color: var(--sodium-ink); }
+.spec.urgent .ic { background: var(--sodium); color: var(--sodium-ink); border-color: var(--sodium); }
 .spec h3 { font-size: var(--s-3); font-weight: 700; letter-spacing: -.015em; line-height: 1.25; }
 .spec p { color: var(--ink-2); }
-.spec q { font-style: normal; color: var(--ink-3); font-size: .95rem; quotes: "“" "”"; }
-.spec q::before { content: "Fjerner: "; font: 500 var(--s-micro)/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); display: block; margin-bottom: 6px; }
+.pain { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.pain q {
+  font-style: normal; quotes: "“" "”"; color: var(--ink-2); font-size: .95rem; line-height: 1.45;
+  background: var(--paper); border: 1px solid var(--line); padding: 10px 14px; border-radius: 16px 16px 16px 4px;
+  text-decoration: line-through; text-decoration-color: transparent; text-decoration-thickness: 2px;
+  transition: text-decoration-color .25s ease, background-color .25s ease;
+}
+.spec:hover .pain q { background: var(--sheet); text-decoration-color: var(--sodium); }
+.solved { display: inline-flex; align-items: center; gap: 6px; font: 600 .7rem/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--signal); padding-left: 4px; }
+.solved svg { width: 14px; height: 14px; }
 @media (max-width: 900px) {
-  .spec { grid-template-columns: 44px minmax(0, 1fr); gap: 8px 16px; }
+  .spec { grid-template-columns: 48px minmax(0, 1fr); gap: 10px 16px; align-items: start; padding-inline: 0; }
+  .spec:hover { background: transparent; }
   .spec > :not(.ic) { grid-column: 2; }
 }
 .fine { margin-top: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.fine > div { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; display: flex; flex-direction: column; gap: 8px; }
+.fine > div { background: var(--paper); border-radius: var(--radius); padding: 22px 24px; display: flex; flex-direction: column; gap: 10px; }
 .fine > div p { color: var(--ink-2); font-size: .97rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { font: 500 .8rem/1 var(--mono); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); color: var(--ink); white-space: nowrap; }
+.chip { font: 500 .8rem/1 var(--mono); padding: 9px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--sheet); color: var(--ink); white-space: nowrap; }
 .chip.urgent { background: var(--sodium); color: var(--sodium-ink); border-color: var(--sodium); }
 @media (max-width: 760px) { .fine { grid-template-columns: minmax(0, 1fr); } }
 
-/* ---------- Steps ---------- */
-.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; counter-reset: s; }
-.step { position: relative; padding: 24px 22px 26px; border-radius: var(--radius); background: var(--sheet); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
-.step .when { font: 500 var(--s-micro)/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--signal); }
-.step h3 { font-size: 1.2rem; font-weight: 700; letter-spacing: -.01em; }
-.step p { color: var(--ink-2); font-size: .97rem; }
-.step .num { font: 800 2.4rem/1 var(--display); color: var(--line); letter-spacing: -.04em; }
-@media (max-width: 960px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+/* ---------- Timeline ---------- */
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: relative; }
+.timeline::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 33px; height: 2px;
+  background: linear-gradient(90deg, var(--signal) 0%, var(--signal) 80%, transparent 100%);
+}
+.tl { position: relative; display: flex; flex-direction: column; gap: 10px; padding-right: 28px; }
+.tl .when { font: 600 var(--s-micro)/16px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--signal); }
+.tl .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--paper); border: 3px solid var(--signal); position: relative; z-index: 1; margin-bottom: 8px; }
+.tl.key .dot { background: var(--sodium); border-color: var(--sodium); box-shadow: 0 0 0 6px color-mix(in srgb, var(--sodium) 30%, transparent); }
+.tl h3 { font-size: 1.25rem; font-weight: 700; letter-spacing: -.015em; }
+.tl p { color: var(--ink-2); font-size: .97rem; }
+.tl .dur { display: inline-flex; align-self: flex-start; font: 500 .74rem/1 var(--mono); padding: 6px 8px; border-radius: 6px; background: var(--sheet); border: 1px solid var(--line); color: var(--ink-2); }
+@media (max-width: 900px) {
+  .timeline { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .timeline::before { left: 7px; right: auto; top: 8px; bottom: 0; width: 2px; height: auto; background: linear-gradient(180deg, var(--signal) 0%, var(--signal) 85%, transparent 100%); }
+  .tl { padding: 0 0 0 36px; }
+  .tl .dot { position: absolute; left: 0; top: 0; margin: 0; }
+}
 
 /* ---------- Morning report ---------- */
-.morning .wrap { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
+.morning .wrap { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
 @media (max-width: 900px) { .morning .wrap { grid-template-columns: minmax(0, 1fr); } }
-.morning-copy { display: flex; flex-direction: column; gap: 22px; }
+.morning-copy { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
 .morning-copy h2 { font-size: var(--s-2); font-weight: 800; letter-spacing: -.03em; line-height: 1.04; }
 .morning-copy > p { color: var(--ink-2); }
 .bonus { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
-.bonus li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); }
-.bonus li svg { width: 22px; height: 22px; color: var(--signal); margin-top: 2px; }
+.bonus li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); }
+.bonus .bi { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--signal-soft); color: var(--signal); }
+.bonus .bi svg { width: 20px; height: 20px; }
 .bonus b { display: block; font-weight: 700; }
 .bonus span { color: var(--ink-2); font-size: .97rem; }
-.phone {
-  justify-self: center; width: min(100%, 380px);
-  background: var(--sheet); border: 1px solid var(--line); border-radius: 36px; padding: 14px;
-  box-shadow: 0 40px 80px -40px rgba(11, 22, 32, .35);
+
+.phone-stage { position: relative; display: grid; place-items: center; min-width: 0; }
+.phone-stage::before {
+  content: ""; position: absolute; width: 78%; aspect-ratio: 1; max-width: 100%; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--signal) 26%, transparent) 0%, transparent 65%);
+  z-index: 0;
 }
-.phone-in { border-radius: 26px; background: var(--paper); padding: 18px 16px 22px; display: flex; flex-direction: column; gap: 12px; }
-.phone-top { display: flex; justify-content: space-between; font: 500 .78rem/1 var(--mono); color: var(--ink-2); padding: 0 4px 6px; }
-.sms-from { text-align: center; font-size: .8rem; color: var(--ink-3); }
-.sms { background: var(--sheet); border: 1px solid var(--line); border-radius: 18px 18px 18px 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; font-size: .9rem; }
-.sms .hd { font-weight: 700; }
-.sms ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.sms li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: baseline; line-height: 1.4; }
-.sms li .tag { font-size: .62rem; padding: 4px 6px; }
-.sms li .tag-cat { background: var(--signal-soft); color: var(--ink); }
-.sms .ft { font: 400 .72rem/1.4 var(--mono); color: var(--ink-3); }
+.phone {
+  position: relative; z-index: 1; width: min(100%, 360px);
+  background: var(--phone-bezel); border-radius: 50px; padding: 11px;
+  box-shadow: 0 50px 90px -40px rgba(11, 22, 32, .7), inset 0 0 0 1.5px #2a3540;
+}
+.screen {
+  border-radius: 40px; color: var(--phone-fg); padding: 12px 14px 26px; overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 10% 0%, #2a3fd6 0%, transparent 55%),
+    radial-gradient(90% 60% at 100% 100%, #0e4a55 0%, transparent 60%),
+    #060b12;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.island { width: 92px; height: 26px; border-radius: 20px; background: #000; margin: 0 auto 14px; }
+.lock-date { text-align: center; font: 500 .9rem/1.2 var(--body); opacity: .85; }
+.lock-time { text-align: center; font: 600 4.6rem/1 var(--display); letter-spacing: -.04em; margin-bottom: 22px; }
+.notif {
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .12);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border-radius: 22px; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px;
+}
+.notif-hd { display: flex; align-items: center; gap: 8px; font: 600 .7rem/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; opacity: .9; }
+.notif-hd .app { width: 22px; height: 22px; border-radius: 6px; background: #1d3cf5; display: grid; place-items: center; }
+.notif-hd .app svg { width: 14px; height: 11px; }
+.notif-hd .ago { margin-left: auto; font-weight: 400; text-transform: none; letter-spacing: 0; opacity: .7; }
+.notif .ttl { font: 700 .95rem/1.3 var(--body); }
+.notif ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; font-size: .84rem; }
+.notif li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: baseline; line-height: 1.38; }
+.notif li .tag { font-size: .6rem; padding: 4px 6px; }
+.notif li .tag-cat { background: rgba(255, 255, 255, .16); color: var(--phone-fg); }
+.notif .ft { font: 400 .7rem/1.4 var(--mono); opacity: .7; border-top: 1px solid rgba(255, 255, 255, .14); padding-top: 9px; }
+.notif-2 { opacity: .55; transform: scale(.94); margin-top: -2px; padding: 10px 14px; }
+.lock-note { text-align: center; font: 400 .68rem/1.4 var(--mono); opacity: .6; margin-top: 10px; }
 
 /* ---------- Pricing ---------- */
 .price-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 16px; }
 @media (max-width: 900px) { .price-grid { grid-template-columns: minmax(0, 1fr); } }
-.plan { background: var(--night); color: var(--night-fg); border-radius: 22px; padding: clamp(24px, 4vw, 44px); display: flex; flex-direction: column; gap: 28px; }
+.plan {
+  position: relative; overflow: hidden;
+  background: var(--night); color: var(--night-fg); border-radius: 24px; padding: clamp(24px, 4vw, 44px);
+  display: flex; flex-direction: column; gap: 28px; border: 1px solid var(--night-line);
+}
+.plan::before {
+  content: ""; position: absolute; right: -20%; top: -40%; width: 70%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--night-cell) 30%, transparent), transparent 65%);
+  pointer-events: none;
+}
+.plan > * { position: relative; }
 .plan-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
 .plan h3 { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -.03em; }
-.plan .sub { color: var(--night-2); margin-top: 6px; }
-.toggle { display: inline-flex; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--night-fg) 9%, transparent); }
-.toggle button { appearance: none; border: 0; background: transparent; color: var(--night-2); font: 600 .85rem/1 var(--body); padding: 10px 14px; border-radius: 999px; cursor: pointer; min-height: 40px; transition: background-color .2s ease, color .2s ease; }
+.plan .sub { color: var(--night-2); margin-top: 6px; max-width: 30em; font-size: .95rem; }
+.toggle { display: inline-flex; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--night-fg) 10%, transparent); border: 1px solid var(--night-line); }
+.toggle button { appearance: none; border: 0; background: transparent; color: var(--night-2); font: 600 .88rem/1 var(--body); padding: 10px 16px; border-radius: 999px; cursor: pointer; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; transition: background-color .2s ease, color .2s ease; }
 .toggle button[aria-pressed="true"] { background: var(--night-fg); color: var(--night); }
+.toggle .tag { font-size: .6rem; padding: 4px 6px; }
 .amount { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.amount b { font: 800 clamp(3.2rem, 7vw, 5rem)/1 var(--display); letter-spacing: -.045em; }
+.amount b { font: 800 clamp(3.4rem, 7.5vw, 5.4rem)/1 var(--display); letter-spacing: -.045em; }
+.amount s { color: var(--night-2); font-size: 1.3rem; }
 .amount span { color: var(--night-2); }
-.plan-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; border-top: 1px solid var(--night-line); }
+.plan-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; border-top: 1px solid var(--night-line); margin: 0; }
 .plan-rows div { display: flex; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--night-line); font-size: .95rem; }
 .plan-rows dt { color: var(--night-2); }
-.plan-rows dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.plan-rows dd { margin: 0; font-weight: 600; text-align: right; }
 @media (max-width: 560px) { .plan-rows { grid-template-columns: minmax(0, 1fr); } }
 .plan .includes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; font-size: .95rem; }
 .plan .includes li { display: flex; gap: 10px; align-items: flex-start; }
-.plan .includes svg { width: 18px; height: 18px; flex: none; margin-top: 3px; color: color-mix(in srgb, var(--signal) 70%, var(--night-fg)); }
+.plan .includes svg { width: 18px; height: 18px; flex: none; margin-top: 3px; color: color-mix(in srgb, var(--night-cell) 70%, var(--night-fg)); }
 @media (max-width: 560px) { .plan .includes { grid-template-columns: minmax(0, 1fr); } }
 .plan .btn-primary { align-self: flex-start; }
-.plan-note { font: 400 var(--s-micro)/1.5 var(--mono); color: var(--night-2); }
+.plan-note { font: 400 .74rem/1.5 var(--mono); color: var(--night-2); }
 .side { display: flex; flex-direction: column; gap: 16px; }
 .box { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 12px; }
-.box h3 { font-size: 1.15rem; font-weight: 700; }
-.box p { color: var(--ink-2); font-size: .97rem; }
-.breakeven b { font: 800 2.6rem/1 var(--display); letter-spacing: -.03em; }
+.box h3 { font-size: 1.12rem; font-weight: 700; }
+.box p { color: var(--ink-2); font-size: .96rem; }
+.breakeven b { font: 800 2.8rem/1 var(--display); letter-spacing: -.035em; color: var(--signal); }
 .guarantee { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; }
-.guarantee .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--signal-soft); color: var(--signal); display: grid; place-items: center; }
+.guarantee + .guarantee { border-top: 1px solid var(--line); padding-top: 14px; }
+.guarantee .ic { width: 40px; height: 40px; border-radius: 50%; background: var(--signal-soft); color: var(--signal); display: grid; place-items: center; }
 .guarantee .ic svg { width: 20px; height: 20px; }
-.scarcity { display: flex; align-items: center; gap: 14px; }
-.slots { display: flex; gap: 6px; }
-.slots i { width: 14px; height: 30px; border-radius: 4px; background: var(--signal); }
+.scarcity { display: flex; align-items: center; gap: 16px; }
+.slots { display: flex; gap: 5px; flex: none; }
+.slots i { width: 12px; height: 34px; border-radius: 4px; border: 2px solid var(--signal); }
 
 /* ---------- Not doing / FAQ ---------- */
-.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 80px); }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(40px, 6vw, 80px); }
 @media (max-width: 900px) { .two { grid-template-columns: minmax(0, 1fr); } }
-.two h2 { font-size: var(--s-2); font-weight: 800; letter-spacing: -.03em; line-height: 1.04; margin-bottom: 24px; }
+.two > div { min-width: 0; }
+.two h2 { font-size: var(--s-2); font-weight: 800; letter-spacing: -.03em; line-height: 1.04; margin: 14px 0 24px; }
 .nots { list-style: none; padding: 0; margin: 0; }
-.nots li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); color: var(--ink-2); }
-.nots li svg { width: 18px; height: 18px; margin-top: 4px; color: var(--ink-3); }
+.nots li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; padding: 15px 0; border-top: 1px solid var(--line); color: var(--ink-2); }
+.nots li .x { width: 24px; height: 24px; border-radius: 50%; background: var(--paper); display: grid; place-items: center; color: var(--ink-3); margin-top: 1px; }
+.nots li .x svg { width: 14px; height: 14px; }
 .nots li b { color: var(--ink); font-weight: 600; }
 .addon { margin-top: 20px; font-size: .95rem; color: var(--ink-2); }
-details { border-top: 1px solid var(--line); }
-details:last-of-type { border-bottom: 1px solid var(--line); }
-summary { list-style: none; cursor: pointer; padding: 18px 0; display: flex; justify-content: space-between; gap: 16px; font-weight: 600; font-size: 1.05rem; }
-summary::-webkit-details-marker { display: none; }
-summary svg { width: 20px; height: 20px; flex: none; transition: transform .2s ease; color: var(--ink-3); margin-top: 3px; }
-details[open] summary svg { transform: rotate(45deg); }
-details p { padding-bottom: 18px; color: var(--ink-2); max-width: 60ch; }
+details.faq { border-top: 1px solid var(--line); }
+details.faq:last-of-type { border-bottom: 1px solid var(--line); }
+details.faq summary { list-style: none; cursor: pointer; padding: 18px 0; display: flex; justify-content: space-between; gap: 16px; font-weight: 600; font-size: 1.05rem; transition: color .2s ease; }
+details.faq summary:hover { color: var(--signal); }
+details.faq summary::-webkit-details-marker { display: none; }
+details.faq summary .pl { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; flex: none; transition: transform .25s ease, background-color .25s ease, border-color .25s ease; }
+details.faq summary .pl svg { width: 14px; height: 14px; }
+details.faq[open] summary .pl { transform: rotate(45deg); background: var(--signal); border-color: var(--signal); color: var(--signal-ink); }
+details.faq p { padding-bottom: 20px; color: var(--ink-2); max-width: 60ch; }
 
 /* ---------- Final CTA ---------- */
-.final { margin-block: clamp(24px, 4vw, 48px) clamp(48px, 6vw, 80px); }
+.final { padding-block: clamp(48px, 6vw, 88px); }
 .final .wrap {
-  background: var(--signal); color: var(--signal-ink); border-radius: 28px;
-  padding: clamp(32px, 6vw, 72px); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); gap: 32px; align-items: end;
-  position: relative; overflow: hidden;
+  background: var(--signal); color: var(--signal-ink); border-radius: 30px;
+  padding: clamp(32px, 6vw, 72px); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: 32px; align-items: end;
+  position: relative; overflow: hidden; isolation: isolate;
 }
 @media (max-width: 860px) { .final .wrap { grid-template-columns: minmax(0, 1fr); } }
 .final h2 { font-size: var(--s-1); font-weight: 900; letter-spacing: -.045em; line-height: .95; }
-.final p { font-size: 1.1rem; opacity: .9; margin-top: 18px; max-width: 30em; }
-.contact { display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 1; }
-.contact-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: color-mix(in srgb, var(--signal-ink) 12%, transparent); border-radius: 14px; padding: 10px 10px 10px 16px; min-width: 0; }
+.final p { font-size: 1.1rem; opacity: .92; margin-top: 18px; max-width: 30em; }
+.contact { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.contact-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: color-mix(in srgb, var(--signal-ink) 14%, transparent); border: 1px solid color-mix(in srgb, var(--signal-ink) 18%, transparent); border-radius: 16px; padding: 10px 10px 10px 16px; min-width: 0; }
 .contact-row div { min-width: 0; }
-.contact-row .label { color: inherit; opacity: .75; }
+.contact-row .label { color: inherit; opacity: .8; }
 .contact-row .val { font: 600 1.02rem/1.3 var(--mono); user-select: all; overflow-wrap: anywhere; }
-.copy { appearance: none; border: 0; cursor: pointer; min-height: 40px; padding: 0 14px; border-radius: 10px; background: var(--signal-ink); color: var(--signal); font: 600 .85rem/1 var(--body); flex: none; }
-.final .wavebg { position: absolute; right: -40px; top: -30px; opacity: .14; pointer-events: none; }
+.copy { appearance: none; border: 0; cursor: pointer; min-height: 44px; padding: 0 16px; border-radius: 12px; background: var(--signal-ink); color: var(--signal); font: 600 .88rem/1 var(--body); flex: none; }
+.final .wavebg { position: absolute; right: -2%; top: 50%; transform: translateY(-50%); height: 120%; width: auto; z-index: -1; opacity: .22; pointer-events: none; }
+.final .wavebg rect { transform-box: fill-box; transform-origin: center; animation: wv 2.4s ease-in-out infinite; }
+.final .wavebg rect:nth-child(2n) { animation-delay: -.6s } .final .wavebg rect:nth-child(3n) { animation-delay: -1.2s } .final .wavebg rect:nth-child(5n) { animation-delay: -1.8s }
 
-footer { border-top: 1px solid var(--line); padding-block: 28px 40px; font-size: var(--s-small); color: var(--ink-3); }
-footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+footer { padding-block: 8px 40px; font-size: var(--s-small); color: var(--ink-3); }
+footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--line); padding-top: 24px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .live-dot, .wave i { animation: none; }
-  .btn, .transcript li { transition: none; }
+  html { scroll-behavior: auto; }
+  .live-dot, .wave i, .final .wavebg rect, .transcript li.active::after { animation: none; }
+  .btn, .transcript li, .spec, .pain q, details.faq summary .pl { transition: none; }
 }
 </style>
 
@@ -354,14 +501,16 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.5V19l4 2v-8.5L22 3z"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
-  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
-  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.7 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
   <symbol id="i-phone-fwd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4-4 4"/><path d="M14 6h8"/><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/></symbol>
   <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m10 9 5 3-5 3z"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 30 24"><rect x="0" y="8" width="4" height="8" rx="2" fill="#fff"/><rect x="6.5" y="3" width="4" height="18" rx="2" fill="#fff"/><rect x="13" y="0" width="4" height="24" rx="2" fill="#fff"/><rect x="19.5" y="5" width="4" height="14" rx="2" fill="#fff"/><rect x="26" y="9" width="4" height="6" rx="2" fill="#fff"/></symbol>
 </svg>
 
 <header class="nav">
@@ -383,7 +532,19 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <a href="#pris">Pris</a>
       <a href="#faq">Spørgsmål</a>
     </nav>
-    <a class="btn btn-primary btn-sm" href="#kontakt">Book 15 min</a>
+    <div class="nav-end">
+      <a class="btn btn-primary btn-sm" href="#kontakt">Book 15 min</a>
+      <details class="mnav" id="mnav">
+        <summary aria-label="Åbn menu"><svg aria-hidden="true"><use href="#i-menu"/></svg></summary>
+        <nav aria-label="Sektioner">
+          <a href="#doegn">Døgnet rundt</a>
+          <a href="#kernen">Hvad den gør</a>
+          <a href="#opstart">Opstart</a>
+          <a href="#pris">Pris</a>
+          <a href="#faq">Spørgsmål</a>
+        </nav>
+      </details>
+    </div>
   </div>
 </header>
 
@@ -392,8 +553,15 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <section class="hero">
     <div class="wrap">
       <div class="hero-copy">
+        <div class="toast" aria-label="Eksempel på en lead-SMS">
+          <span class="app"><svg aria-hidden="true"><use href="#i-bars"/></svg></span>
+          <div class="txt">
+            <b><span class="tag tag-urgent">Haster</span> Værksted · lør 21:48</b>
+            <span>Mette H.: Bil starter ikke, skal bruge den i morgen tidlig.</span>
+          </div>
+        </div>
         <span class="kicker label"><span class="live-dot" aria-hidden="true"></span>AI-receptionist til bilhuse og værksteder</span>
-        <h1>Dit bilhus mister aldrig et <span class="strike">ubesvaret</span> opkald igen.</h1>
+        <h1>Dit bilhus mister <span class="mark">aldrig</span> et opkald <span class="hl">igen.</span></h1>
         <p class="hero-lede">Nees Voice tager telefonen, <strong>når I har lukket</strong>, og <strong>når I ikke når den</strong>. Kunden får svar, og den rigtige person får en SMS med navn, nummer og hvad det drejer sig om.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="#kontakt">Book et 15-minutters opkald <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
@@ -402,34 +570,47 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
         <p class="guarantee-note"><svg aria-hidden="true"><use href="#i-shield"/></svg>Live på 72 timer, ellers er opsætningen gratis.</p>
       </div>
 
-      <aside class="call" aria-label="Eksempel på et opkald, som agenten tager">
-        <div class="call-head">
-          <div>
-            <div class="who">Indgående opkald</div>
-            <div class="meta">LØR 21:47 · VIDERESTILLET · 00:58</div>
+      <div class="call-wrap">
+        <svg class="bigwave" viewBox="0 0 600 300" aria-hidden="true">
+          <g fill="currentColor">
+            <rect x="0" y="125" width="24" height="50" rx="12"/><rect x="44" y="95" width="24" height="110" rx="12"/>
+            <rect x="88" y="55" width="24" height="190" rx="12"/><rect x="132" y="85" width="24" height="130" rx="12"/>
+            <rect x="176" y="20" width="24" height="260" rx="12"/><rect x="220" y="65" width="24" height="170" rx="12"/>
+            <rect x="264" y="0" width="24" height="300" rx="12"/><rect x="308" y="45" width="24" height="210" rx="12"/>
+            <rect x="352" y="90" width="24" height="120" rx="12"/><rect x="396" y="35" width="24" height="230" rx="12"/>
+            <rect x="440" y="80" width="24" height="140" rx="12"/><rect x="484" y="110" width="24" height="80" rx="12"/>
+            <rect x="528" y="70" width="24" height="160" rx="12"/><rect x="572" y="120" width="24" height="60" rx="12"/>
+          </g>
+        </svg>
+        <aside class="call" aria-label="Eksempel på et opkald, som agenten tager">
+          <div class="call-head">
+            <div>
+              <div class="who">Indgående opkald</div>
+              <div class="meta">LØR 21:47 · VIDERESTILLET · <span id="call-time">00:00</span></div>
+            </div>
+            <span class="pill"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>AI svarer</span>
           </div>
-          <span class="pill"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>AI svarer</span>
-        </div>
-        <ol class="transcript" id="transcript">
-          <li class="ai"><span class="t">00:00</span><div><span class="spk">Agent</span>Hej, du har ringet til Bilhuset Vest. Du taler med vores AI-assistent, og jeg sender din besked videre. Hvad kan jeg hjælpe med?</div></li>
-          <li><span class="t">00:09</span><div><span class="spk">Kunde</span>Min bil vil ikke starte, og jeg skal bruge den til arbejde i morgen tidlig.</div></li>
-          <li class="ai"><span class="t">00:16</span><div><span class="spk">Agent</span>Det lyder akut. Må jeg få dit navn og nummer, så ringer værkstedet dig op?</div></li>
-          <li><span class="t">00:24</span><div><span class="spk">Kunde</span>Mette Holm, 22 34 56 78.</div></li>
-        </ol>
-        <div class="lead">
-          <span class="label" style="color:var(--night-2)">Sendt som SMS til vagtnummer · 21:48</span>
-          <div class="lead-card">
-            <div class="row"><span class="tag tag-urgent">Haster</span><span class="tag tag-cat">Værksted</span></div>
-            <p>Mette Holm, 22 34 56 78. Bil starter ikke, skal bruge den i morgen tidlig.</p>
+          <ol class="transcript" id="transcript">
+            <li class="ai" data-t="00:00"><span class="t">00:00</span><div><span class="spk">Agent <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>Hej, du har ringet til Bilhuset Vest. Du taler med vores AI-assistent, og jeg sender din besked videre. Hvad kan jeg hjælpe med?</div></li>
+            <li data-t="00:09"><span class="t">00:09</span><div><span class="spk">Kunde <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>Min bil vil ikke starte, og jeg skal bruge den til arbejde i morgen tidlig.</div></li>
+            <li class="ai" data-t="00:16"><span class="t">00:16</span><div><span class="spk">Agent <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>Det lyder akut. Må jeg få dit navn og nummer, så ringer værkstedet dig op?</div></li>
+            <li data-t="00:24"><span class="t">00:24</span><div><span class="spk">Kunde <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>Mette Holm, 22 34 56 78.</div></li>
+          </ol>
+          <div class="lead">
+            <span class="label" style="color:var(--night-2)">Sendt som SMS til vagtnummer · 21:48</span>
+            <div class="lead-card">
+              <div class="row"><span class="tag tag-urgent">Haster</span><span class="tag tag-cat">Værksted</span></div>
+              <p>Mette Holm, 22 34 56 78. Bil starter ikke, skal bruge den i morgen tidlig.</p>
+            </div>
+            <span class="fictive">Eksempel. Bilhuset Vest og kunden er fiktive.</span>
           </div>
-          <span class="fictive">Eksempel. Bilhuset Vest og kunden er fiktive.</span>
-        </div>
-      </aside>
+        </aside>
+      </div>
     </div>
   </section>
 
-  <!-- WEEK COVERAGE -->
-  <section class="block" id="doegn">
+  <!-- NIGHT: WEEK COVERAGE -->
+  <section class="band band-night" id="doegn">
     <div class="wrap">
       <div class="sec-head">
         <span class="label">Døgnet rundt</span>
@@ -437,6 +618,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
         <p>Selv med lange åbningstider er der 124 timer om ugen, hvor ingen tager den. Og i åbningstiden ligger mekanikeren under en bil, mens sælgeren står med en kunde. Agenten dækker begge dele.</p>
       </div>
       <div class="week">
+        <p class="now-line" id="now-line"></p>
         <div class="week-scroll">
           <div class="week-grid" id="week" role="img" aria-label="Ugeoversigt: åbent mandag til fredag 8 til 16 og lørdag 10 til 14. Resten af ugen, 124 timer, tager agenten alle opkald. I åbningstiden tager den dem, I ikke når."></div>
         </div>
@@ -445,16 +627,16 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <span><i class="open" aria-hidden="true"></i>Åbent: agenten tager over efter 3-4 ring, hvis ingen svarer</span>
         </div>
         <div class="stats">
-          <div class="stat"><b>124 t</b><span>om ugen uden for åbningstid, med åbent man-fre 8-16 og lør 10-14</span></div>
-          <div class="stat"><b>3-4 ring</b><span>før agenten tager opkaldet i åbningstiden</span></div>
-          <div class="stat"><b>72 t</b><span>fra opstartsopkald til agenten er live og testet</span></div>
+          <div class="stat"><b>124<em> t</em></b><span>om ugen uden for åbningstid, med åbent man-fre 8-16 og lør 10-14</span></div>
+          <div class="stat"><b>3-4<em> ring</em></b><span>før agenten tager opkaldet i åbningstiden</span></div>
+          <div class="stat"><b>72<em> t</em></b><span>fra opstartsopkald til agenten er live og testet</span></div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- CORE -->
-  <section class="block" id="kernen">
+  <section class="band band-sheet" id="kernen">
     <div class="wrap">
       <div class="sec-head">
         <span class="label">Kernen</span>
@@ -466,37 +648,37 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <span class="ic"><svg aria-hidden="true"><use href="#i-moon"/></svg></span>
           <h3>Natte-Svar</h3>
           <p>Tager alle opkald uden for åbningstid. Aftener, nætter, weekender og helligdage.</p>
-          <q>Vi misser opkald, når vi har lukket.</q>
+          <div class="pain"><q>Vi misser opkald, når vi har lukket.</q><span class="solved"><svg aria-hidden="true"><use href="#i-check"/></svg>Løst</span></div>
         </li>
         <li class="spec">
           <span class="ic"><svg aria-hidden="true"><use href="#i-busy"/></svg></span>
           <h3>Optaget-Svar</h3>
           <p>Tager opkald i åbningstiden, når linjen er optaget, eller ingen har svaret efter 3-4 ring.</p>
-          <q>Mekanikeren ligger under en bil, og sælgeren står med en kunde.</q>
+          <div class="pain"><q>Mekanikeren ligger under en bil, og sælgeren står med en kunde.</q><span class="solved"><svg aria-hidden="true"><use href="#i-check"/></svg>Løst</span></div>
         </li>
         <li class="spec">
           <span class="ic"><svg aria-hidden="true"><use href="#i-route"/></svg></span>
           <h3>Ret-Person-Routing</h3>
           <p>Sorterer efter hvad kunden vil og sender direkte til den rigtige. Spørger kunden efter Claus, går beskeden til Claus.</p>
-          <q>Jeg gider ikke rode i en fælles bunke.</q>
+          <div class="pain"><q>Jeg gider ikke rode i en fælles bunke.</q><span class="solved"><svg aria-hidden="true"><use href="#i-check"/></svg>Løst</span></div>
         </li>
         <li class="spec urgent">
           <span class="ic"><svg aria-hidden="true"><use href="#i-alert"/></svg></span>
           <h3>HASTER-Alarm</h3>
           <p>Straks-SMS til jeres vagtnummer ved nødsituationer og akutte reklamationer.</p>
-          <q>Hvad med nødsituationer?</q>
+          <div class="pain"><q>Hvad med nødsituationer?</q><span class="solved"><svg aria-hidden="true"><use href="#i-check"/></svg>Løst</span></div>
         </li>
         <li class="spec">
           <span class="ic"><svg aria-hidden="true"><use href="#i-filter"/></svg></span>
           <h3>Støj-Filter</h3>
           <p>Spam og sælgere bliver sorteret fra, før de når jer.</p>
-          <q>Bliver jeg spammet?</q>
+          <div class="pain"><q>Bliver jeg spammet?</q><span class="solved"><svg aria-hidden="true"><use href="#i-check"/></svg>Løst</span></div>
         </li>
         <li class="spec">
           <span class="ic"><svg aria-hidden="true"><use href="#i-chart"/></svg></span>
           <h3>Overblik</h3>
           <p>Dashboard med alle opkald og leads. Hvert lead kommer også som SMS eller mail med et resumé på én linje.</p>
-          <q>Hvordan ved jeg, at den virker?</q>
+          <div class="pain"><q>Hvordan ved jeg, at den virker?</q><span class="solved"><svg aria-hidden="true"><use href="#i-check"/></svg>Løst</span></div>
         </li>
       </ul>
       <div class="fine">
@@ -514,79 +696,90 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     </div>
   </section>
 
-  <!-- ONBOARDING -->
-  <section class="block" id="opstart">
+  <!-- ONBOARDING TIMELINE -->
+  <section class="band" id="opstart">
     <div class="wrap">
       <div class="sec-head">
         <span class="label">Opstart · done-for-you</span>
         <h2>I bruger 20 minutter. Vi klarer resten.</h2>
         <p>Ingen lange setup-møder. Vi researcher jeres hjemmeside og sociale medier selv, og bygger agenten personligt til jeres forretning.</p>
       </div>
-      <ol class="steps">
-        <li class="step">
-          <span class="num" aria-hidden="true">1</span>
-          <span class="when">15 minutter</span>
+      <ol class="timeline">
+        <li class="tl">
+          <span class="when">Dag 0</span>
+          <span class="dot" aria-hidden="true"></span>
           <h3>Opstartsopkald</h3>
+          <span class="dur">15 min af jeres tid</span>
           <p>Ét opkald, hvor vi afstemmer kategorier, kontaktpersoner og hvad agenten må svare på.</p>
         </li>
-        <li class="step">
-          <span class="num" aria-hidden="true">2</span>
-          <span class="when">5 minutter</span>
+        <li class="tl">
+          <span class="when">Dag 0</span>
+          <span class="dot" aria-hidden="true"></span>
           <h3>Viderestilling sammen</h3>
+          <span class="dur">5 min af jeres tid</span>
           <p>Vi sætter viderestillingen op med jer, live. I skal ikke selv finde koder eller ringe til teleselskabet.</p>
         </li>
-        <li class="step">
-          <span class="num" aria-hidden="true">3</span>
+        <li class="tl key">
           <span class="when">Inden 72 timer</span>
+          <span class="dot" aria-hidden="true"></span>
           <h3>Agenten går live</h3>
+          <span class="dur">Garanteret</span>
           <p>Bygget, testet og klar til at tage jeres opkald. Ellers betaler I ikke for opsætningen.</p>
         </li>
-        <li class="step">
-          <span class="num" aria-hidden="true">4</span>
-          <span class="when">Første uge, og løbende</span>
+        <li class="tl">
+          <span class="when">Uge 1 og frem</span>
+          <span class="dot" aria-hidden="true"></span>
           <h3>Finjustering</h3>
-          <p>Vi justerer efter de første rigtige opkald. Nye åbningstider, ferielukning eller kontaktpersoner rettes inden for 48 timer.</p>
+          <span class="dur">Rettelser inden 48 t</span>
+          <p>Vi justerer efter de første rigtige opkald. Nye åbningstider, ferielukning eller kontaktpersoner rettes løbende.</p>
         </li>
       </ol>
     </div>
   </section>
 
   <!-- MORNING REPORT -->
-  <section class="block morning" id="overblik">
+  <section class="band band-sheet morning" id="overblik">
     <div class="wrap">
       <div class="morning-copy">
         <span class="label">Inkluderet: 3 bonusser</span>
         <h2>Kl. 07:00 ved I, hvem der ringede i nat.</h2>
         <p>I stedet for 30 løse beskeder får I én samlet oversigt hver morgen, sorteret efter kategori og med HASTER øverst.</p>
         <ul class="bonus">
-          <li><svg aria-hidden="true"><use href="#i-sun"/></svg><div><b>Morgen-Overblik og Månedsstatus</b><span>Daglig SMS eller mail kl. 07:00, plus en automatisk månedsrapport med antal opkald, leads pr. kategori og antal HASTER.</span></div></li>
-          <li><svg aria-hidden="true"><use href="#i-phone-fwd"/></svg><div><b>5-Minutters-Viderestilling</b><span>Vi sætter det op sammen, 1-til-1. Intet teknisk bøvl.</span></div></li>
-          <li><svg aria-hidden="true"><use href="#i-play"/></svg><div><b>2-Minutters-Overblik</b><span>En kort video, så hele holdet forstår dashboardet på to minutter.</span></div></li>
+          <li><span class="bi"><svg aria-hidden="true"><use href="#i-sun"/></svg></span><div><b>Morgen-Overblik og Månedsstatus</b><span>Daglig SMS eller mail kl. 07:00, plus en automatisk månedsrapport med antal opkald, leads pr. kategori og antal HASTER.</span></div></li>
+          <li><span class="bi"><svg aria-hidden="true"><use href="#i-phone-fwd"/></svg></span><div><b>5-Minutters-Viderestilling</b><span>Vi sætter det op sammen, 1-til-1. Intet teknisk bøvl.</span></div></li>
+          <li><span class="bi"><svg aria-hidden="true"><use href="#i-play"/></svg></span><div><b>2-Minutters-Overblik</b><span>En kort video, så hele holdet forstår dashboardet på to minutter.</span></div></li>
         </ul>
       </div>
-      <div class="phone" aria-label="Eksempel på Morgen-Overblik som SMS">
-        <div class="phone-in">
-          <div class="phone-top mono"><span>07:00</span><span>Nees Voice</span></div>
-          <div class="sms-from">I dag 07:00</div>
-          <div class="sms">
-            <span class="hd">Morgen-Overblik · 5 nye leads</span>
-            <ol>
-              <li><span class="tag tag-urgent">Haster</span><span>Mette H. · Bil starter ikke, skal bruge den kl. 7 · 22 34 56 78</span></li>
-              <li><span class="tag tag-cat">Køb</span><span>Jonas P. · Spørger til brugt elbil set på nettet · 31 22 90 14</span></li>
-              <li><span class="tag tag-cat">Værksted</span><span>Lone K. · Vil booke dækskift, gerne torsdag · 40 55 18 32</span></li>
-              <li><span class="tag tag-cat">Salg</span><span>Ahmad R. · Vil sælge sin bil til jer · 28 71 63 05</span></li>
-              <li><span class="tag tag-cat">Til Claus</span><span>Peter S. · Bad om Claus, opfølgning på tilbud · 26 13 47 88</span></li>
-            </ol>
-            <span class="ft">2 spamopkald sorteret fra. Se alt i dashboardet.</span>
+      <div class="phone-stage">
+        <div class="phone" role="img" aria-label="Eksempel: Morgen-Overblik som notifikation på en låst telefon kl. 07:00 med fem nye leads, HASTER øverst">
+          <div class="screen">
+            <div class="island"></div>
+            <div class="lock-date">søndag 11. oktober</div>
+            <div class="lock-time">07:00</div>
+            <div class="notif">
+              <div class="notif-hd"><span class="app"><svg aria-hidden="true"><use href="#i-bars"/></svg></span>Nees Voice<span class="ago">nu</span></div>
+              <div class="ttl">Morgen-Overblik · 5 nye leads</div>
+              <ol>
+                <li><span class="tag tag-urgent">Haster</span><span>Mette H. · Bil starter ikke · 22 34 56 78</span></li>
+                <li><span class="tag tag-cat">Køb</span><span>Jonas P. · Brugt elbil set på nettet</span></li>
+                <li><span class="tag tag-cat">Værksted</span><span>Lone K. · Dækskift, gerne torsdag</span></li>
+                <li><span class="tag tag-cat">Salg</span><span>Ahmad R. · Vil sælge sin bil til jer</span></li>
+                <li><span class="tag tag-cat">Til Claus</span><span>Peter S. · Opfølgning på tilbud</span></li>
+              </ol>
+              <span class="ft">2 spamopkald sorteret fra · se alt i dashboardet</span>
+            </div>
+            <div class="notif notif-2">
+              <div class="notif-hd"><span class="app"><svg aria-hidden="true"><use href="#i-bars"/></svg></span>Nees Voice<span class="ago">lør 21:48</span></div>
+            </div>
+            <div class="lock-note">Eksempel med fiktive kunder</div>
           </div>
-          <div class="sms-from">Eksempel med fiktive kunder</div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- PRICING -->
-  <section class="block" id="pris">
+  <section class="band" id="pris">
     <div class="wrap">
       <div class="sec-head">
         <span class="label">Pris</span>
@@ -602,10 +795,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
             </div>
             <div class="toggle" role="group" aria-label="Vælg pris">
               <button type="button" id="p-std" aria-pressed="true">Standard</button>
-              <button type="button" id="p-found" aria-pressed="false">Founding</button>
+              <button type="button" id="p-found" aria-pressed="false">Founding <span class="tag tag-urgent">Første kunder</span></button>
             </div>
           </div>
-          <div class="amount"><b id="p-month">5.900</b><span>kr. pr. måned, ekskl. moms</span></div>
+          <div class="amount"><b id="p-month">5.900</b><s id="p-was" hidden>5.900</s><span>kr. pr. måned, ekskl. moms</span></div>
           <dl class="plan-rows">
             <div><dt>Opsætning, engang</dt><dd id="p-setup">9.900 kr.</dd></div>
             <div><dt>Opkald inkluderet</dt><dd>300 pr. md.</dd></div>
@@ -621,14 +814,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
             <li><svg aria-hidden="true"><use href="#i-check"/></svg>Alle 3 bonusser</li>
           </ul>
           <a class="btn btn-primary" href="#kontakt">Book et 15-minutters opkald <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <p class="plan-note" id="plan-note">Fair use: opkald maks. 5 minutter. Spam og opkald under 10 sekunder tæller ikke med.</p>
+          <p class="plan-note">Fair use: opkald maks. 5 minutter. Spam og opkald under 10 sekunder tæller ikke med.</p>
         </div>
 
         <div class="side">
           <div class="box breakeven">
             <span class="label">Regnestykket</span>
-            <b id="be">≈ 4 jobs</b>
-            <p id="be-text">Ved fx 1.500 kr. pr. værkstedsjob er månedsprisen tjent hjem med cirka 4 reddede jobs om måneden. Eller én solgt bil hver anden-tredje måned.</p>
+            <b id="be">≈ 3,9 jobs</b>
+            <p id="be-text">Ved fx 1.500 kr. pr. værkstedsjob er månedsprisen tjent hjem med cirka 3,9 reddede jobs om måneden. Eller én solgt bil hver anden-tredje måned.</p>
           </div>
           <div class="box">
             <div class="guarantee">
@@ -652,40 +845,40 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   </section>
 
   <!-- NOT DOING + FAQ -->
-  <section class="block" id="faq">
+  <section class="band band-sheet" id="faq">
     <div class="wrap two">
       <div>
         <span class="label">Klare grænser</span>
-        <h2 style="margin-top:14px">Det her gør agenten ikke.</h2>
+        <h2>Det her gør agenten ikke.</h2>
         <ul class="nots">
-          <li><svg aria-hidden="true"><use href="#i-x"/></svg><span><b>Ingen kalenderbooking.</b> Agenten noterer kundens ønskede tidspunkt, og I bekræfter.</span></li>
-          <li><svg aria-hidden="true"><use href="#i-x"/></svg><span><b>Ingen bindende aftaler.</b> Den giver aldrig priser, tilbud eller løfter på jeres vegne.</span></li>
-          <li><svg aria-hidden="true"><use href="#i-x"/></svg><span><b>Ingen DMS-integration</b> i første version.</span></li>
-          <li><svg aria-hidden="true"><use href="#i-x"/></svg><span><b>Ingen løfter om omsætning.</b> Vi garanterer det, vi selv styrer: at agenten er live, og at den tager opkaldene.</span></li>
+          <li><span class="x"><svg aria-hidden="true"><use href="#i-x"/></svg></span><span><b>Ingen kalenderbooking.</b> Agenten noterer kundens ønskede tidspunkt, og I bekræfter.</span></li>
+          <li><span class="x"><svg aria-hidden="true"><use href="#i-x"/></svg></span><span><b>Ingen bindende aftaler.</b> Den giver aldrig priser, tilbud eller løfter på jeres vegne.</span></li>
+          <li><span class="x"><svg aria-hidden="true"><use href="#i-x"/></svg></span><span><b>Ingen DMS-integration</b> i første version.</span></li>
+          <li><span class="x"><svg aria-hidden="true"><use href="#i-x"/></svg></span><span><b>Ingen løfter om omsætning.</b> Vi garanterer det, vi selv styrer: at agenten er live, og at den tager opkaldene.</span></li>
         </ul>
         <p class="addon">Kalenderbooking, integrationer og nye flows kan tilkøbes senere.</p>
       </div>
       <div>
         <span class="label">Spørgsmål</span>
-        <h2 style="margin-top:14px">Det, bilhuse plejer at spørge om.</h2>
-        <details>
-          <summary>Ved kunden, at det er en AI? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <h2>Det, bilhuse plejer at spørge om.</h2>
+        <details class="faq">
+          <summary>Ved kunden, at det er en AI? <span class="pl"><svg aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
           <p>Ja. Agenten siger det i starten af hvert opkald og fortæller, at beskeden bliver sendt videre til jer.</p>
         </details>
-        <details>
-          <summary>Skal vi skifte telefonnummer? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <details class="faq">
+          <summary>Skal vi skifte telefonnummer? <span class="pl"><svg aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
           <p>Nej. I beholder jeres nummer og viderestiller bare til agenten, når I har lukket, eller når ingen tager den. Vi sætter det op sammen med jer på fem minutter.</p>
         </details>
-        <details>
-          <summary>Hvad hvis noget virkelig haster? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <details class="faq">
+          <summary>Hvad hvis noget virkelig haster? <span class="pl"><svg aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
           <p>Så får jeres vagtnummer en SMS med det samme, mærket HASTER. Det gælder nødsituationer og akutte reklamationer.</p>
         </details>
-        <details>
-          <summary>Hvem retter agenten, når noget ændrer sig? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <details class="faq">
+          <summary>Hvem retter agenten, når noget ændrer sig? <span class="pl"><svg aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
           <p>Det gør vi. Åbningstider, ferielukning, kontaktpersoner og fra-priser bliver rettet inden for 48 timer.</p>
         </details>
-        <details>
-          <summary>Hvad hvis vi ikke kan lide det? <svg aria-hidden="true"><use href="#i-plus"/></svg></summary>
+        <details class="faq">
+          <summary>Hvad hvis vi ikke kan lide det? <span class="pl"><svg aria-hidden="true"><use href="#i-plus"/></svg></span></summary>
           <p>Afmeld inden for 30 dage fra go-live, så refunderer vi alt, også opsætningen.</p>
         </details>
       </div>
@@ -695,7 +888,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <!-- FINAL CTA -->
   <section class="final" id="kontakt">
     <div class="wrap">
-      <svg class="wavebg" width="420" height="300" viewBox="0 0 420 300" aria-hidden="true">
+      <svg class="wavebg" viewBox="0 0 420 300" aria-hidden="true">
         <g fill="currentColor">
           <rect x="0" y="110" width="28" height="80" rx="14"/><rect x="48" y="60" width="28" height="180" rx="14"/>
           <rect x="96" y="20" width="28" height="260" rx="14"/><rect x="144" y="80" width="28" height="140" rx="14"/>
@@ -704,7 +897,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <rect x="384" y="120" width="28" height="60" rx="14"/>
         </g>
       </svg>
-      <div style="position:relative;z-index:1">
+      <div>
         <h2>Næste opkald kunne være en solgt bil.</h2>
         <p>Book 15 minutter. Vi ser på, hvor mange opkald I går glip af i dag, og om Altid-Svar giver mening for jer.</p>
       </div>
@@ -731,32 +924,56 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 
 <script>
 (function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var pad = function (n) { return String(n).padStart(2, "0"); };
+
   // Week coverage grid: open Mon-Fri 8-16, Sat 10-14
   var days = ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"];
+  var isOpen = function (d, h) { return (d < 5 && h >= 8 && h < 16) || (d === 5 && h >= 10 && h < 14); };
+  var now = null;
+  try {
+    var parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Copenhagen", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
+    var get = function (t) { return (parts.find(function (p) { return p.type === t; }) || {}).value; };
+    var wd = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(get("weekday"));
+    if (wd >= 0) now = { d: wd, h: parseInt(get("hour"), 10) % 24, m: get("minute") };
+  } catch (e) {}
+
   var grid = document.getElementById("week");
-  var html = '<span></span>';
-  for (var h = 0; h < 24; h++) html += '<span class="h">' + (h % 3 === 0 ? String(h).padStart(2, "0") : "") + '</span>';
+  var html = "<span></span>";
+  for (var h = 0; h < 24; h++) html += '<span class="h">' + (h % 3 === 0 ? pad(h) : "") + "</span>";
   days.forEach(function (d, i) {
-    html += '<span class="d">' + d + '</span>';
+    html += '<span class="d">' + d + "</span>";
     for (var h = 0; h < 24; h++) {
-      var open = (i < 5 && h >= 8 && h < 16) || (i === 5 && h >= 10 && h < 14);
-      html += '<span class="cell' + (open ? ' open' : '') + '" title="' + d + ' ' + String(h).padStart(2, "0") + ':00 · ' + (open ? 'Åbent, agenten tager det I ikke når' : 'Lukket, agenten tager alle opkald') + '"></span>';
+      var open = isOpen(i, h);
+      var here = now && now.d === i && now.h === h;
+      html += '<span class="cell' + (open ? " open" : "") + (here ? " now" : "") + '" title="' + d + " " + pad(h) + ":00 · " + (open ? "Åbent, agenten tager det I ikke når" : "Lukket, agenten tager alle opkald") + '"></span>';
     }
   });
   grid.innerHTML = html;
-
-  // Transcript: walk a highlight through the lines (all text stays visible)
-  var lines = document.querySelectorAll("#transcript li");
-  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var idx = 0;
-  lines[0].classList.add("active");
-  if (!reduce) {
-    setInterval(function () {
-      lines[idx].classList.remove("active");
-      idx = (idx + 1) % lines.length;
-      lines[idx].classList.add("active");
-    }, 2600);
+  if (now) {
+    document.getElementById("now-line").innerHTML = '<i aria-hidden="true"></i>Lige nu, ' + days[now.d].toLowerCase() + " " + pad(now.h) + ":" + now.m + ": " +
+      (isOpen(now.d, now.h) ? "I har åbent. Agenten tager de opkald, I ikke når." : "I har lukket. Agenten tager alle opkald.");
   }
+
+  // Transcript: walk a "speaking" highlight through the lines; all text stays visible
+  var lines = document.querySelectorAll("#transcript li");
+  var clock = document.getElementById("call-time");
+  var idx = 0;
+  var show = function (i) {
+    lines.forEach(function (l) { l.classList.remove("active"); });
+    void lines[i].offsetWidth;
+    lines[i].classList.add("active");
+    clock.textContent = lines[i].dataset.t;
+  };
+  if (reduce) { clock.textContent = "00:58"; }
+  else {
+    show(0);
+    setInterval(function () { idx = (idx + 1) % lines.length; show(idx); }, 2800);
+  }
+
+  // Mobile menu closes after picking a section
+  var mnav = document.getElementById("mnav");
+  mnav.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", function () { mnav.open = false; }); });
 
   // Price toggle
   var std = document.getElementById("p-std"), found = document.getElementById("p-found");
@@ -765,6 +982,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     found.setAttribute("aria-pressed", String(isFound));
     var month = isFound ? 4900 : 5900;
     document.getElementById("p-month").textContent = month.toLocaleString("da-DK");
+    document.getElementById("p-was").hidden = !isFound;
     document.getElementById("p-setup").textContent = (isFound ? 4900 : 9900).toLocaleString("da-DK") + " kr.";
     document.getElementById("plan-sub").textContent = isFound
       ? "Founding-pris for de første bilhuse. Månedsprisen er låst, så længe I er kunde, mod en case med rigtige tal."
