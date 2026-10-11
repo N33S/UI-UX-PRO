@@ -609,20 +609,30 @@ function completeTask(id, li) {
   const t = findTask(id); if (!t || (li && li.classList.contains('closing'))) return;
   if (t.done) { t.done = false; t.doneAt = null; commit(); return; }
   if (editingId === id) editingId = null;
+  const before = { focus: t.focus };
+  const timers = [];
+  let finished = false;
   const finish = () => {
+    finished = true;
     t.done = true; t.doneAt = Date.now(); t.focus = false;
     commit();
     const c = $('#shippedCount'); c.classList.remove('bump'); c.getBoundingClientRect(); c.classList.add('bump');
-    toast(`Shipped: ${t.text}`, { action: 'Fortryd', onAction: () => { t.done = false; t.doneAt = null; commit(); } });
   };
+  // undo is offered immediately, also while the closing animation runs
+  toast(`Shipped: ${t.text}`, { action: 'Fortryd', onAction: () => {
+    timers.forEach(clearTimeout);
+    if (!finished) { render(); return; }
+    t.done = false; t.doneAt = null; t.focus = before.focus && openFocus().length < FOCUS_MAX;
+    commit();
+  } });
   buzz(10);
   if (!li || reduced.matches) return finish();
   li.classList.add('closing');
-  setTimeout(() => {
+  timers.push(setTimeout(() => {
     li.style.height = li.offsetHeight + 'px'; li.getBoundingClientRect();
     li.classList.add('collapsing'); li.style.height = '0px';
-  }, 520);
-  setTimeout(finish, 760);
+  }, 520));
+  timers.push(setTimeout(finish, 760));
 }
 function deleteTask(id) {
   const i = state.tasks.findIndex(t => t.id === id); if (i < 0) return;
